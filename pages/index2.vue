@@ -11,7 +11,7 @@
               Absence
             </div>
             <v-list-item-title class="text-h3 mb-1">
-              {{ totalAbsent }}
+              100
             </v-list-item-title>
             <v-list-item-subtitle>Total number of staff absent</v-list-item-subtitle>
           </v-list-item-content>
@@ -74,18 +74,13 @@
     </v-col>
   </v-row>
 </template>
-
 <script>
 // eslint-disable-next-line import/no-named-as-default
 import gql from 'graphql-tag'
 export default {
-  name: 'Index',
-  data () {
-    return {
-      totalPresent: 0,
-      totalAbsent: 0,
-    }
-  },
+  data: () => ({
+    totalPresent: 0
+  }),
   apollo: {
     attendance: {
       query: gql`
@@ -96,19 +91,30 @@ export default {
             }
             }
             `,
-      update: data => data.attendance,
-      result ({ data, loading, networkStatus }) {
-        // eslint-disable-next-line camelcase
-        this.totalPresent = data.attendance.filter(({is_present}) => is_present === true).length
-        // eslint-disable-next-line camelcase
-        this.totalAbsent = data.attendance.filter(({is_present}) => is_present === false).length
-      },
       context: {
         headers: {
           'x-hasura-admin-secret': 'al9qRRTz3KyATwkdyNuJCxXasdhnpZ7IQghfi7Dyn09dRmJgkdsJ3Wp3RxUPXu0t'
         }
       },
+      update: data => {
+        this.totalPresent = data.attendance
+      }
+// subscribeToMore: {
+//   document: gql`subscription getAttendanceSubscription {
+//   attendance {
+//     id
+//     is_present
+//   }
+// }`,
+//   // Mutate the previous result
+//   updateQuery: (previousResult, { subscriptionData }) => {
+//     this.getTotalPresent(subscriptionData)
+//     this.getTotalPresent('see me')
+//   },
+// }
     }
   },
+
 }
 </script>
+

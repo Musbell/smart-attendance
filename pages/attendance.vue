@@ -35,13 +35,26 @@
          <div v-if="loading" class="loading-indicator">
            Loading...
          </div>
-         <qrcode-stream v-if="!destroyed" :key="_uid" :camera='camera' :track="paintCenterText" @decode='onDecode' @init="onInit">
-           <div v-show="showScanConfirmation" class="scan-confirmation">
-             <img src="https://res.cloudinary.com/musbell/image/upload/v1593962985/5d4d82ec574a788542d8e1e9_success-2-once_fayepz.gif" alt="Checkmark"  />
-           </div>
-         </qrcode-stream>
+         <div  v-if='result' style='max-width: 100%'>
+           <v-img
+             style='margin: auto'
+             lazy-src="https://innovativesecurities.com/images/icons/success-2-once.gif"
+             max-width="100"
+             src="https://innovativesecurities.com/images/icons/success-2-once.gif"
+           ></v-img>
+         </div>
+        <div v-else>
+          <qrcode-stream v-if="!destroyed" :key="_uid" :camera='camera' :track="paintCenterText" @decode='onDecode' @init="onInit">
+            <div v-show="showScanConfirmation" class="scan-confirmation">
+              <img src="https://res.cloudinary.com/musbell/image/upload/v1593962985/5d4d82ec574a788542d8e1e9_success-2-once_fayepz.gif" alt="Checkmark"  />
+            </div>
+          </qrcode-stream>
+        </div>
          <v-card-text>
            <p class="decode-result">Staff ID: <b>{{ result }}</b></p>
+           <v-btn v-if='result' block class='my-5' @click='$router.go()'>
+             Reset
+           </v-btn>
          </v-card-text>
        </v-card>
      </v-col>
@@ -53,8 +66,88 @@
          elevation='5'
          rounded
        >
+         <div v-if='profileLoading && !result'>Loading profile...</div>
+         <v-container v-if='result'>
+           <v-row justify='space-between' class='mt-5'>
+             <v-col cols='12' sm='4'>
+               <v-avatar tile size='200'>
+                 <img
+                   :src="staffDetail.photo"
+                   :alt="staffDetail.id"
+                 >
+               </v-avatar>
+             </v-col>
+             <v-col cols='12' sm='8'>
+               <v-row>
+                 <v-col
+                   cols="12"
+                   sm="6"
+                   md="4"
+                 >
+                   <v-text-field
+                     v-model="staffDetail.first_name"
+                     disabled
+                     label="First name"
+                   ></v-text-field>
+                 </v-col>
+                 <v-col
+                   cols="12"
+                   sm="6"
+                   md="4"
+                 >
+                   <v-text-field
+                     v-model="staffDetail.last_name"
+                     disabled
+                     label="last name"
+                   ></v-text-field>
+                 </v-col>
+                 <v-col
+                   cols="12"
+                   sm="6"
+                   md="4"
+                 >
+                   <v-text-field
+                     v-model="staffDetail.role"
+                     disabled
+                     label="Role"
+                   ></v-text-field>
+                 </v-col>
+                 <v-col
+                   cols="12"
+                   sm="6"
+                   md="4"
+                 >
+                   <v-text-field
+                     v-model="staffDetail.salary"
+                     disabled
+                     label="Salary (₦)"
+                   ></v-text-field>
+                 </v-col>
+                 <v-col
+                   cols="12"
+                   sm="6"
+                   md="4"
+                 >
+                   <v-text-field
+                     v-model="staffDetail.working_days"
+                     disabled
+                     label="Working days"
+                   ></v-text-field>
+                 </v-col>
+               </v-row>
+               <v-subheader class='mt-10'>
+                 <v-icon small class='mx-3'>mdi-checkbox-marked-circle-outline</v-icon> {{ staffDetail.getTotalPresent() }}
+                 <v-icon small class='mx-3'>mdi-close-circle-outline</v-icon> {{ staffDetail.getTotalAbsent() }}
+                 <span class='caption mx-2'>of {{ staffDetail.working_days }} working days</span>
+                 <v-spacer/> Net pay: ₦0
+               </v-subheader>
+             </v-col>
+           </v-row>
+         </v-container>
          <v-img
+           v-else
            height="500"
+           style='opacity: 0.8;'
            src="https://res.cloudinary.com/musbell/image/upload/v1625850827/2c6884_53d196003ef84b7eaf535640b426b016_mv2_h0t4lb.gif"
          ></v-img>
        </v-card>
@@ -63,7 +156,10 @@
  </div>
 </template>
 <script>
+// eslint-disable-next-line import/no-named-as-default
+import gql from 'graphql-tag'
 import Particles from '~/components/Particles'
+
 export default {
   name: 'Attendance',
   components: {
@@ -74,17 +170,119 @@ export default {
   data () {
     return {
       loading: false,
+      profileLoading: false,
       destroyed: false,
       camera: 'auto',
       result: null,
-      showScanConfirmation: false
+      showScanConfirmation: false,
+      staffDetail: {
+        id: null,
+        photo: '',
+        first_name: '',
+        last_name: '',
+        role: '',
+        salary: '',
+        working_days: 0,
+        staff_id: null,
+        attendances: [{
+          id: null,
+          is_present: false,
+          date: null,
+        }],
+        getTotalPresent() {
+          return 0
+        },
+        getTotalAbsent() {
+          return 0
+        }
+      }
     }
   },
+
   methods: {
+    // eslint-disable-next-line camelcase
+    async postAttendance(staff, is_present) {
+      try {
+        await this.$apollo.mutate({mutation: gql`
+            mutation postAttendance($staff: Int!, $is_present: Boolean! ) {
+            insert_attendance_one(object: {
+              staff: $staff,
+              is_present: $is_present,
+            }) {
+              id
+            }
+          }
+        `,  context: {
+            headers: {
+              'x-hasura-admin-secret': 'al9qRRTz3KyATwkdyNuJCxXasdhnpZ7IQghfi7Dyn09dRmJgkdsJ3Wp3RxUPXu0t'
+            }
+          },
+          variables: {
+            staff,
+            is_present
+          },
+        })
+      } catch (e) {
+        console.log(e)
+      }
+    },
+    async getStaff() {
+      this.profileLoading = true
+      try {
+        await this.$apollo.query({
+          query: gql`
+                query getStaff($staff_id: uuid_comparison_exp! ){
+                    staff_aggregate(where: {
+                      staff_id: $staff_id
+                    }) {
+                      nodes {
+                         id
+                          first_name
+                          last_name
+                          role
+                          salary
+                          working_days
+                          photo
+                          staff_id
+                          attendances {
+                            id
+                            is_present
+                            date
+                          }
+                      }
+                    }
+                  }
+          `,
+          context: {
+            headers: {
+              'x-hasura-admin-secret': 'al9qRRTz3KyATwkdyNuJCxXasdhnpZ7IQghfi7Dyn09dRmJgkdsJ3Wp3RxUPXu0t'
+            }
+          },
+          variables: {
+            staff_id:  {
+              _eq: this.result
+            }
+          },
+        }).then(({data}) => {
+          (this.staffDetail = {...data.staff_aggregate.nodes[0],  getTotalPresent() {
+            // eslint-disable-next-line no-unused-expressions,camelcase
+            return this.attendances.filter(({is_present}) => is_present === true).length
+          },
+          getTotalAbsent() {
+            // eslint-disable-next-line no-unused-expressions,camelcase
+            return this.attendances.filter(({is_present}) => is_present === false).length
+          }})
+          this.postAttendance(this.staffDetail.id, true)
+          this.profileLoading = false
+        })
+      } catch (e) {
+        this.profileLoading = false
+        console.error(e)
+      }
+    },
     paintCenterText (detectedCodes, ctx) {
       for (const detectedCode of detectedCodes) {
         const { boundingBox, rawValue } = detectedCode
-        console.log(rawValue)
 
         const centerX = boundingBox.x + boundingBox.width/ 2
         const centerY = boundingBox.y + boundingBox.height/ 2
@@ -115,6 +313,9 @@ export default {
     },
     async onDecode (content) {
       this.result = content
+      if(this.result) {
+        await this.getStaff()
+      }
 
       this.pause()
       await this.timeout(500)

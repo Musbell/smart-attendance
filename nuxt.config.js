@@ -1,5 +1,4 @@
 import colors from 'vuetify/es5/util/colors'
-
 export default {
   // Target: https://go.nuxtjs.dev/config-target
   target: 'static',
@@ -25,7 +24,8 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
-    {src: '~/plugins/qrcode', mode: 'client'}
+    {src: '~/plugins/qrcode', mode: 'client'},
+    // '~/plugins/qrcode.vue',
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -48,6 +48,7 @@ export default {
     // https://go.nuxtjs.dev/pwa
     '@nuxtjs/pwa',
     '@nuxtjs/auth-next',
+    '@nuxtjs/apollo',
   ],
   auth: {
     // Options
@@ -65,6 +66,14 @@ export default {
   },
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {},
+  apollo: {
+    clientConfigs: {
+      default: {
+        httpEndpoint: 'https://smart-attendace.hasura.app/v1/graphql',
+        tokenName: 'auth._token.auth0'
+      },
+    }
+  },
 
   // PWA module configuration: https://go.nuxtjs.dev/pwa
   pwa: {
@@ -94,7 +103,6 @@ export default {
       }
     }
   },
-
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
   }

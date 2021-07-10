@@ -1,7 +1,7 @@
 <template>
   <v-data-table
     :headers="headers"
-    :items="desserts"
+    :items="staff"
     sort-by="calories"
     class="elevation-1"
   >
@@ -16,313 +16,262 @@
           vertical
         ></v-divider>
         <v-spacer></v-spacer>
-        <v-dialog
-          v-model="dialog"
-          max-width="500px"
-        >
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn
-              color="primary"
-              dark
-              class="mb-2"
-              v-bind="attrs"
-              v-on="on"
-            >
-              New Staff
-            </v-btn>
-          </template>
-          <v-card>
-            <v-card-title>
-              <span class="text-h5">{{ formTitle }}</span>
-            </v-card-title>
-
-            <v-card-text>
-              <v-container>
-                <v-row>
-                  <v-col
-                    cols="12"
-                    sm="6"
-                    md="4"
-                  >
-                    <v-text-field
-                      v-model="editedItem.name"
-                      label="Dessert name"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col
-                    cols="12"
-                    sm="6"
-                    md="4"
-                  >
-                    <v-text-field
-                      v-model="editedItem.calories"
-                      label="Calories"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col
-                    cols="12"
-                    sm="6"
-                    md="4"
-                  >
-                    <v-text-field
-                      v-model="editedItem.fat"
-                      label="Fat (g)"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col
-                    cols="12"
-                    sm="6"
-                    md="4"
-                  >
-                    <v-text-field
-                      v-model="editedItem.carbs"
-                      label="Carbs (g)"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col
-                    cols="12"
-                    sm="6"
-                    md="4"
-                  >
-                    <v-text-field
-                      v-model="editedItem.protein"
-                      label="Protein (g)"
-                    ></v-text-field>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-card-text>
-
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn
-                color="blue darken-1"
-                text
-                @click="close"
-              >
-                Cancel
-              </v-btn>
-              <v-btn
-                color="blue darken-1"
-                text
-                @click="save"
-              >
-                Save
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-        <v-dialog v-model="dialogDelete" max-width="500px">
-          <v-card>
-            <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="blue darken-1" text @click="closeDelete">Cancel</v-btn>
-              <v-btn color="blue darken-1" text @click="deleteItemConfirm">OK</v-btn>
-              <v-spacer></v-spacer>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
       </v-toolbar>
+      <v-dialog
+        v-model="dialog"
+        max-width="800px"
+      >
+        <v-card>
+          <v-card-title>
+            <span class="text-h5">{{ staffDetail.first_name }}  {{ staffDetail.last_name }}</span>
+          </v-card-title>
+          <v-card-text>
+            <v-container>
+              <v-row justify='space-between'>
+                <v-col cols='12' sm='4'>
+                  <v-avatar tile size='200'>
+                    <img
+                      :src="staffDetail.photo"
+                      :alt="staffDetail.id"
+                    >
+                  </v-avatar>
+                 <div class='mt-3'>
+                  <v-card color='white' width='200'>
+                    <v-card-text>
+                      <qrcode-vue :value="staffDetail.staff_id" size="150" level="L" margin='20' />
+                    </v-card-text>
+                  </v-card>
+<!--                   <qrcode-->
+<!--                     :value="staffDetail.id"-->
+<!--                     :options="{ width: 200, color: { dark: '#424242', light: '#BDBDBD' } }"-->
+<!--                     tag="img"-->
+<!--                   ></qrcode>-->
+                 </div>
+                </v-col>
+                <v-col cols='12' sm='8'>
+                                  <v-row>
+                                    <v-col
+                                      cols="12"
+                                      sm="6"
+                                      md="4"
+                                    >
+                                      <v-text-field
+                                        v-model="staffDetail.first_name"
+                                        disabled
+                                        label="First name"
+                                      ></v-text-field>
+                                    </v-col>
+                                    <v-col
+                                      cols="12"
+                                      sm="6"
+                                      md="4"
+                                    >
+                                      <v-text-field
+                                        v-model="staffDetail.last_name"
+                                        disabled
+                                        label="last name"
+                                      ></v-text-field>
+                                    </v-col>
+                                    <v-col
+                                      cols="12"
+                                      sm="6"
+                                      md="4"
+                                    >
+                                      <v-text-field
+                                        v-model="staffDetail.role"
+                                        disabled
+                                        label="Role"
+                                      ></v-text-field>
+                                    </v-col>
+                                    <v-col
+                                      cols="12"
+                                      sm="6"
+                                      md="4"
+                                    >
+                                      <v-text-field
+                                        v-model="staffDetail.salary"
+                                        disabled
+                                        label="Salary (₦)"
+                                      ></v-text-field>
+                                    </v-col>
+                                    <v-col
+                                      cols="12"
+                                      sm="6"
+                                      md="4"
+                                    >
+                                      <v-text-field
+                                        v-model="staffDetail.working_days"
+                                        disabled
+                                        label="Working days"
+                                      ></v-text-field>
+                                    </v-col>
+                                  </v-row>
+                  <v-subheader>
+                    <v-icon small class='mx-3'>mdi-checkbox-marked-circle-outline</v-icon> {{ staffDetail.getTotalPresent() }}
+                    <v-icon small class='mx-3'>mdi-close-circle-outline</v-icon> {{ staffDetail.getTotalAbsent() }}
+                    <span class='caption mx-2'>of {{ staffDetail.working_days }} working days</span>
+                    <v-spacer/> Net pay: ₦0
+                  </v-subheader>
+                  <v-simple-table dense>
+                    <template v-slot:default>
+                      <thead>
+                      <tr>
+                        <th class="text-left">
+                          status
+                        </th>
+                        <th class="text-left">
+                          Date
+                        </th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      <tr
+                        v-for="item in staffDetail.attendances"
+                        :key="item.id"
+                      >
+                        <td>
+                          <v-icon v-if='item.is_present'>mdi-checkbox-marked-circle-outline</v-icon>
+                          <v-icon v-if='!item.is_present'>mdi-close-circle-outline</v-icon>
+                        </td>
+                        <td>{{ item.date }}</td>
+                      </tr>
+                      </tbody>
+                    </template>
+                  </v-simple-table>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="blue darken-1"
+              text
+              @click="close"
+            >
+              Cancel
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </template>
     <template  #[`item.actions`]="{ item }">
       <v-icon
         small
         class="mr-2"
-        @click="editItem(item)"
+        @click.stop="openDialog(item)"
       >
-        mdi-pencil
-      </v-icon>
-      <v-icon
-        small
-        @click="deleteItem(item)"
-      >
-        mdi-delete
+        mdi-eye
       </v-icon>
     </template>
-    <template v-slot:no-data>
-      <v-btn
-        color="primary"
-        @click="initialize"
-      >
-        Reset
-      </v-btn>
+    <template #[`item.photo`]="{ item }">
+     <v-container>
+       <v-avatar size='30'>
+         <img
+           :src="item.photo"
+           alt="John"
+         >
+       </v-avatar>
+     </v-container>
     </template>
   </v-data-table>
 </template>
 <script>
+// eslint-disable-next-line import/no-named-as-default
+import gql from 'graphql-tag'
+import QrcodeVue from 'qrcode.vue'
+
+
 export default {
   name: 'Staff',
+  components: {
+    QrcodeVue,
+  },
   data: () => ({
     dialog: false,
-    dialogDelete: false,
+    staff: [],
     headers: [
       {
-        text: 'Dessert (100g serving)',
+        text: 'Photo',
         align: 'start',
         sortable: false,
-        value: 'name',
+        value: 'photo',
       },
-      { text: 'Calories', value: 'calories' },
-      { text: 'Fat (g)', value: 'fat' },
-      { text: 'Carbs (g)', value: 'carbs' },
-      { text: 'Protein (g)', value: 'protein' },
+      { text: 'First name', value: 'first_name' },
+      { text: 'last name', value: 'last_name' },
+      { text: 'Role', value: 'role' },
+      { text: 'Salary (₦)', value: 'salary' },
       { text: 'Actions', value: 'actions', sortable: false },
     ],
-    desserts: [],
-    editedIndex: -1,
-    editedItem: {
-      name: '',
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0,
-    },
-    defaultItem: {
-      name: '',
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0,
-    },
+    staffDetail: {
+      id: null,
+      photo: '',
+      first_name: '',
+      last_name: '',
+      role: '',
+      salary: '',
+      working_days: 0,
+      staff_id: null,
+      attendances: [{
+        id: null,
+        is_present: false,
+        date: null,
+      }],
+      getTotalPresent() {
+        return 0
+      },
+      getTotalAbsent() {
+        return 0
+      }
+    }
   }),
-
-  computed: {
-    formTitle () {
-      return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
-    },
+  apollo: {
+    staff: {
+      query: gql`
+            query getStaff {
+            staff {
+              id
+              first_name
+              last_name
+              role
+              salary
+              working_days
+              photo
+              staff_id
+              attendances {
+                id
+                is_present
+                date
+              }
+            }
+          }`,
+      update: data => data.staff,
+      result ({ data, loading, networkStatus }) {
+        this.staff = [...data.staff]
+      },
+      context: {
+        headers: {
+          'x-hasura-admin-secret': 'al9qRRTz3KyATwkdyNuJCxXasdhnpZ7IQghfi7Dyn09dRmJgkdsJ3Wp3RxUPXu0t'
+        }
+      },
+    }
   },
-
-  watch: {
-    dialog (val) {
-      val || this.close()
-    },
-    dialogDelete (val) {
-      val || this.closeDelete()
-    },
-  },
-
-  created () {
-    this.initialize()
-  },
-
   methods: {
-    initialize () {
-      this.desserts = [
-        {
-          name: 'Frozen Yogurt',
-          calories: 159,
-          fat: 6.0,
-          carbs: 24,
-          protein: 4.0,
-        },
-        {
-          name: 'Ice cream sandwich',
-          calories: 237,
-          fat: 9.0,
-          carbs: 37,
-          protein: 4.3,
-        },
-        {
-          name: 'Eclair',
-          calories: 262,
-          fat: 16.0,
-          carbs: 23,
-          protein: 6.0,
-        },
-        {
-          name: 'Cupcake',
-          calories: 305,
-          fat: 3.7,
-          carbs: 67,
-          protein: 4.3,
-        },
-        {
-          name: 'Gingerbread',
-          calories: 356,
-          fat: 16.0,
-          carbs: 49,
-          protein: 3.9,
-        },
-        {
-          name: 'Jelly bean',
-          calories: 375,
-          fat: 0.0,
-          carbs: 94,
-          protein: 0.0,
-        },
-        {
-          name: 'Lollipop',
-          calories: 392,
-          fat: 0.2,
-          carbs: 98,
-          protein: 0,
-        },
-        {
-          name: 'Honeycomb',
-          calories: 408,
-          fat: 3.2,
-          carbs: 87,
-          protein: 6.5,
-        },
-        {
-          name: 'Donut',
-          calories: 452,
-          fat: 25.0,
-          carbs: 51,
-          protein: 4.9,
-        },
-        {
-          name: 'KitKat',
-          calories: 518,
-          fat: 26.0,
-          carbs: 65,
-          protein: 7,
-        },
-      ]
-    },
-
-    editItem (item) {
-      this.editedIndex = this.desserts.indexOf(item)
-      this.editedItem = Object.assign({}, item)
-      this.dialog = true
-    },
-
-    deleteItem (item) {
-      this.editedIndex = this.desserts.indexOf(item)
-      this.editedItem = Object.assign({}, item)
-      this.dialogDelete = true
-    },
-
-    deleteItemConfirm () {
-      this.desserts.splice(this.editedIndex, 1)
-      this.closeDelete()
-    },
-
     close () {
       this.dialog = false
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem)
-        this.editedIndex = -1
-      })
     },
-
-    closeDelete () {
-      this.dialogDelete = false
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem)
-        this.editedIndex = -1
-      })
-    },
-
-    save () {
-      if (this.editedIndex > -1) {
-        Object.assign(this.desserts[this.editedIndex], this.editedItem)
-      } else {
-        this.desserts.push(this.editedItem)
+    openDialog(item) {
+      this.dialog = true
+      this.staffDetail = {...item, getTotalPresent() {
+          // eslint-disable-next-line no-unused-expressions,camelcase
+          return this.attendances.filter(({is_present}) => is_present === true).length
+        },
+        getTotalAbsent() {
+          // eslint-disable-next-line no-unused-expressions,camelcase
+          return this.attendances.filter(({is_present}) => is_present === false).length
+        }
       }
-      this.close()
-    },
+    }
   },
 }
 </script>

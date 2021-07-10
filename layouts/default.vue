@@ -40,7 +40,6 @@
     </v-navigation-drawer>
     <v-app-bar
       :clipped-left="clipped"
-      color='#FFB300'
       fixed
       app
     >
@@ -73,7 +72,7 @@
       <v-spacer />
       <v-btn
         icon
-        @click="$auth.logout()"
+        @click="logout()"
       >
         <v-icon>mdi-logout</v-icon>
       </v-btn>
@@ -138,6 +137,11 @@ export default {
       rightDrawer: false,
       title: 'Karota'
     }
+  },
+  methods: {
+    async logout() {
+      await this.$auth.logout()
+    },
   }
 }
 </script>
