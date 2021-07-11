@@ -21,12 +21,14 @@
      ></v-img>
      <v-toolbar-title>Staff Attendance</v-toolbar-title>
      <v-spacer></v-spacer>
+     <v-subheader>{{ $moment().format('MMMM Do YYYY, h:mm:ss a') }}</v-subheader>
      <v-btn icon @click='$router.push("/")'>
        <v-icon>mdi-home</v-icon>
      </v-btn>
    </v-app-bar>
    <v-row justify="center" align="center" class='mt-2'>
      <v-col cols="12" sm="8" md="4">
+       <v-subheader><v-icon class='mr-3'>mdi-alert-box-outline</v-icon>Clock-in with your Qrcode<v-icon class='ml-3'>mdi-qrcode</v-icon></v-subheader>
        <v-card
          class="mx-auto"
          flat
@@ -61,13 +63,14 @@
      <v-col cols="12" sm="8" md="8">
        <v-card
          class="mx-auto"
-         color='transparent'
+         color='black'
+         style='opacity: 0.8'
          height='500'
-         elevation='5'
+         elevation='10'
          rounded
        >
-         <div v-if='profileLoading && !result'>Loading profile...</div>
-         <v-container v-if='result'>
+         <div v-if='profileLoading'>Loading profile...</div>
+         <v-container v-if='result && profileLoading === false'>
            <v-row justify='space-between' class='mt-5'>
              <v-col cols='12' sm='4'>
                <v-avatar tile size='200'>
@@ -137,9 +140,9 @@
                </v-row>
                <v-subheader class='mt-10'>
                  <v-icon small class='mx-3'>mdi-checkbox-marked-circle-outline</v-icon> {{ staffDetail.getTotalPresent() }}
-                 <v-icon small class='mx-3'>mdi-close-circle-outline</v-icon> {{ staffDetail.getTotalAbsent() }}
+                 <v-icon small class='mx-3'>mdi-close-circle-outline</v-icon> {{ staffDetail.working_days - staffDetail.getTotalPresent() }}
                  <span class='caption mx-2'>of {{ staffDetail.working_days }} working days</span>
-                 <v-spacer/> Net pay: ₦0
+                 <v-spacer/> Net pay: ₦{{ calculateNetPay((((staffDetail.working_days - staffDetail.getTotalPresent()) / 5) >> 0) * 10, staffDetail.salary) }}
                </v-subheader>
              </v-col>
            </v-row>
@@ -200,6 +203,9 @@ export default {
   },
 
   methods: {
+    calculateNetPay(partialValue, totalValue) {
+      return totalValue - ((totalValue / 100) * partialValue);
+    },
     // eslint-disable-next-line camelcase
     async postAttendance(staff, is_present) {
       try {
@@ -266,7 +272,7 @@ export default {
         }).then(({data}) => {
           (this.staffDetail = {...data.staff_aggregate.nodes[0],  getTotalPresent() {
             // eslint-disable-next-line no-unused-expressions,camelcase
-            return this.attendances.filter(({is_present}) => is_present === true).length
+            return this.attendances.filter(({is_present}) => is_present === true).length + 1
           },
           getTotalAbsent() {
             // eslint-disable-next-line no-unused-expressions,camelcase

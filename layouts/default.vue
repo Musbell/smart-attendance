@@ -1,55 +1,55 @@
 <template>
   <v-app dark>
-    <v-navigation-drawer
-      v-model="drawer"
-      :mini-variant="miniVariant"
-      :clipped="clipped"
-      fixed
-      app
-    >
-      <template #prepend>
-        <v-list-item two-line>
-          <v-list-item-avatar>
-            <img :src="$auth.user.picture" />
-          </v-list-item-avatar>
+<!--    <v-navigation-drawer-->
+<!--      v-model="drawer"-->
+<!--      :mini-variant="miniVariant"-->
+<!--      :clipped="clipped"-->
+<!--      fixed-->
+<!--      app-->
+<!--    >-->
+<!--      <template #prepend>-->
+<!--        <v-list-item two-line>-->
+<!--          <v-list-item-avatar>-->
+<!--            <img :src="$auth.user.picture" />-->
+<!--          </v-list-item-avatar>-->
 
-          <v-list-item-content>
-            <v-list-item-title>{{ $auth.user.name }}</v-list-item-title>
-            <v-list-item-subtitle>Logged In</v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-      </template>
+<!--          <v-list-item-content>-->
+<!--            <v-list-item-title>{{ $auth.user.name }}</v-list-item-title>-->
+<!--            <v-list-item-subtitle>Logged In</v-list-item-subtitle>-->
+<!--          </v-list-item-content>-->
+<!--        </v-list-item>-->
+<!--      </template>-->
 
-      <v-divider></v-divider>
-      <v-list>
-        <v-list-item
-          v-for="(item, i) in items"
-          :key="i"
-          :to="item.to"
-          router
-          exact
-        >
-          <v-list-item-action>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title v-text="item.title" />
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
-    </v-navigation-drawer>
+<!--      <v-divider></v-divider>-->
+<!--      <v-list>-->
+<!--        <v-list-item-->
+<!--          v-for="(item, i) in items"-->
+<!--          :key="i"-->
+<!--          :to="item.to"-->
+<!--          router-->
+<!--          exact-->
+<!--        >-->
+<!--          <v-list-item-action>-->
+<!--            <v-icon>{{ item.icon }}</v-icon>-->
+<!--          </v-list-item-action>-->
+<!--          <v-list-item-content>-->
+<!--            <v-list-item-title v-text="item.title" />-->
+<!--          </v-list-item-content>-->
+<!--        </v-list-item>-->
+<!--      </v-list>-->
+<!--    </v-navigation-drawer>-->
     <v-app-bar
       :clipped-left="clipped"
       fixed
       app
     >
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-btn
-        icon
-        @click.stop="miniVariant = !miniVariant"
-      >
-        <v-icon>mdi-{{ `chevron-${miniVariant ? 'right' : 'left'}` }}</v-icon>
-      </v-btn>
+<!--      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />-->
+<!--      <v-btn-->
+<!--        icon-->
+<!--        @click.stop="miniVariant = !miniVariant"-->
+<!--      >-->
+<!--        <v-icon>mdi-{{ `chevron-${miniVariant ? 'right' : 'left'}` }}</v-icon>-->
+<!--      </v-btn>-->
 <!--      <v-btn-->
 <!--        icon-->
 <!--        @click.stop="clipped = !clipped"-->
@@ -70,6 +70,13 @@
       ></v-img>
       <v-toolbar-title v-text="title" />
       <v-spacer />
+      <v-btn
+        icon
+        nuxt
+        to='/attendance'
+      >
+        <v-icon>mdi-account-group</v-icon>
+      </v-btn>
       <v-btn
         icon
         @click="logout()"
@@ -113,14 +120,14 @@ export default {
   data () {
     return {
       clipped: true,
-      drawer: true,
+      drawer: false,
       fixed: true,
       items: [
-        {
-          icon: 'mdi-apps',
-          title: 'Dashboard',
-          to: '/'
-        },
+        // {
+        //   icon: 'mdi-apps',
+        //   title: 'Dashboard',
+        //   to: '/'
+        // },
         {
           icon: 'mdi-account-group',
           title: 'Staff',
@@ -133,7 +140,7 @@ export default {
         }
       ],
       miniVariant: false,
-      right: true,
+      right: false,
       rightDrawer: false,
       title: 'Karota'
     }
